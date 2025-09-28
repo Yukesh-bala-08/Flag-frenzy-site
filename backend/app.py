@@ -1,0 +1,333 @@
+from flask import Flask, request, jsonify, session
+from flask_cors import CORS
+import sqlite3
+import hashlib
+import os
+import uuid
+from datetime import datetime
+
+app = Flask(__name__)
+app.secret_key = os.urandom(24)
+CORS(app)
+
+# Database setup
+def init_db():
+    conn = sqlite3.connect('ctf.db')
+    c = conn.cursor()
+    
+    # Users table
+    c.execute('''CREATE TABLE IF NOT EXISTS users
+                 (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                  username TEXT UNIQUE NOT NULL,
+                  password TEXT NOT NULL,
+                  role TEXT NOT NULL,
+                  team_id INTEGER)''')
+    
+    # Teams table
+    c.execute('''CREATE TABLE IF NOT EXISTS teams
+                 (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                  name TEXT UNIQUE NOT NULL,
+                  code TEXT UNIQUE NOT NULL,
+                  score INTEGER DEFAULT 0,
+                  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
+    
+    # Challenges table
+    c.execute('''CREATE TABLE IF NOT EXISTS challenges
+                 (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                  title TEXT NOT NULL,
+                  description TEXT,
+                  category TEXT NOT NULL,
+                  difficulty TEXT NOT NULL,
+                  points INTEGER NOT NULL,
+                  flag TEXT NOT NULL,
+                  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
+    
+    # Submissions table
+    c.execute('''CREATE TABLE IF NOT EXISTS submissions
+                 (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                  team_id INTEGER NOT NULL,
+                  challenge_id INTEGER NOT NULL,
+                  flag TEXT NOT NULL,
+                  poc TEXT,
+                  description TEXT,
+                  status TEXT DEFAULT 'pending',
+                  submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
+    
+    # Insert admin user if not exists
+    try:
+        c.execute("INSERT INTO users (username, password, role) VALUES (?, ?, ?)",
+                  ('admin', hashlib.sha256('admin'.encode()).hexdigest(), 'admin'))
+    except sqlite3.IntegrityError:
+        pass
+    
+    conn.commit()
+    conn.close()
+
+init_db()
+
+# Helper functions
+def get_db_connection():
+    conn = sqlite3.connect('ctf.db')
+    conn.row_factory = sqlite3.Row
+    return conn
+
+# Authentication routes
+@app.route('/api/login', methods=['POST'])
+def login():
+    data = request.json
+    username = data.get('username')
+    password = data.get('password')
+    
+    conn = get_db_connection()
+    user = conn.execute(
+        'SELECT * FROM users WHERE username = ? AND password = ?',
+        (username, hashlib.sha256(password.encode()).hexdigest())
+    ).fetchone()
+    conn.close()
+    
+    if user:
+        session['user_id'] = user['id']
+        session['username'] = user['username']
+        session['role'] = user['role']
+        session['team_id'] = user['team_id']
+        
+        return jsonify({
+            'success': True,
+            'user': {
+                'id': user['id'],
+                'username': user['username'],
+                'role': user['role'],
+                'team_id': user['team_id']
+            }
+        })
+    else:
+        return jsonify({'success': False, 'message': 'Invalid credentials'}), 401
+
+@app.route('/api/logout', methods=['POST'])
+def logout():
+    session.clear()
+    return jsonify({'success': True})
+
+# Team routes
+@app.route('/api/teams', methods=['GET'])
+def get_teams():
+    conn = get_db_connection()
+    teams = conn.execute('SELECT * FROM teams ORDER BY score DESC').fetchall()
+    conn.close()
+    
+    return jsonify([dict(team) for team in teams])
+
+@app.route('/api/teams', methods=['POST'])
+def create_team():
+    if 'user_id' not in session:
+        return jsonify({'success': False, 'message': 'Not authenticated'}), 401
+    
+    data = request.json
+    team_name = data.get('name')
+    
+    # Generate unique team code
+    team_code = str(uuid.uuid4())[:8].upper()
+    
+    conn = get_db_connection()
+    
+    try:
+        # Create team
+        cursor = conn.cursor()
+        cursor.execute(
+            'INSERT INTO teams (name, code) VALUES (?, ?)',
+            (team_name, team_code)
+        )
+        team_id = cursor.lastrowid
+        
+        # Update user's team
+        conn.execute(
+            'UPDATE users SET team_id = ? WHERE id = ?',
+            (team_id, session['user_id'])
+        )
+        
+        conn.commit()
+        session['team_id'] = team_id
+    except sqlite3.IntegrityError:
+        conn.close()
+        return jsonify({'success': False, 'message': 'Team name already exists'}), 400
+    
+    conn.close()
+    return jsonify({'success': True, 'team_id': team_id, 'code': team_code})
+
+@app.route('/api/teams/join', methods=['POST'])
+def join_team():
+    if 'user_id' not in session:
+        return jsonify({'success': False, 'message': 'Not authenticated'}), 401
+    
+    data = request.json
+    team_code = data.get('code')
+    
+    conn = get_db_connection()
+    team = conn.execute('SELECT * FROM teams WHERE code = ?', (team_code,)).fetchone()
+    
+    if not team:
+        conn.close()
+        return jsonify({'success': False, 'message': 'Invalid team code'}), 400
+    
+    # Update user's team
+    conn.execute(
+        'UPDATE users SET team_id = ? WHERE id = ?',
+        (team['id'], session['user_id'])
+    )
+    conn.commit()
+    conn.close()
+    
+    session['team_id'] = team['id']
+    return jsonify({'success': True, 'team_id': team['id']})
+
+# Challenge routes
+@app.route('/api/challenges', methods=['GET'])
+def get_challenges():
+    conn = get_db_connection()
+    challenges = conn.execute('SELECT * FROM challenges').fetchall()
+    conn.close()
+    
+    return jsonify([dict(challenge) for challenge in challenges])
+
+@app.route('/api/challenges', methods=['POST'])
+def create_challenge():
+    if session.get('role') != 'admin':
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 403
+    
+    data = request.json
+    conn = get_db_connection()
+    
+    try:
+        conn.execute(
+            'INSERT INTO challenges (title, description, category, difficulty, points, flag) VALUES (?, ?, ?, ?, ?, ?)',
+            (data['title'], data['description'], data['category'], data['difficulty'], data['points'], data['flag'])
+        )
+        conn.commit()
+    except sqlite3.IntegrityError:
+        conn.close()
+        return jsonify({'success': False, 'message': 'Challenge creation failed'}), 400
+    
+    conn.close()
+    return jsonify({'success': True})
+
+# Submission routes
+@app.route('/api/submissions', methods=['POST'])
+def submit_flag():
+    if 'user_id' not in session or not session.get('team_id'):
+        return jsonify({'success': False, 'message': 'Not authenticated or not in a team'}), 401
+    
+    data = request.json
+    challenge_id = data.get('challenge_id')
+    flag = data.get('flag')
+    poc = data.get('poc')
+    description = data.get('description')
+    
+    conn = get_db_connection()
+    
+    # Check if challenge exists and flag is correct
+    challenge = conn.execute(
+        'SELECT * FROM challenges WHERE id = ? AND flag = ?',
+        (challenge_id, flag)
+    ).fetchone()
+    
+    if not challenge:
+        conn.close()
+        return jsonify({'success': False, 'message': 'Invalid flag'}), 400
+    
+    # Check if already submitted
+    existing = conn.execute(
+        'SELECT * FROM submissions WHERE team_id = ? AND challenge_id = ? AND status = "accepted"',
+        (session['team_id'], challenge_id)
+    ).fetchone()
+    
+    if existing:
+        conn.close()
+        return jsonify({'success': False, 'message': 'Challenge already solved'}), 400
+    
+    # Create submission
+    conn.execute(
+        'INSERT INTO submissions (team_id, challenge_id, flag, poc, description) VALUES (?, ?, ?, ?, ?)',
+        (session['team_id'], challenge_id, flag, poc, description)
+    )
+    
+    # For demo, auto-accept (in real app, admin would review)
+    # Update team score
+    conn.execute(
+        'UPDATE teams SET score = score + ? WHERE id = ?',
+        (challenge['points'], session['team_id'])
+    )
+    
+    # Mark submission as accepted
+    conn.execute(
+        'UPDATE submissions SET status = "accepted" WHERE team_id = ? AND challenge_id = ?',
+        (session['team_id'], challenge_id)
+    )
+    
+    conn.commit()
+    conn.close()
+    
+    return jsonify({'success': True})
+
+@app.route('/api/submissions', methods=['GET'])
+def get_submissions():
+    if session.get('role') != 'admin':
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 403
+    
+    conn = get_db_connection()
+    submissions = conn.execute('''
+        SELECT s.*, t.name as team_name, c.title as challenge_title 
+        FROM submissions s
+        JOIN teams t ON s.team_id = t.id
+        JOIN challenges c ON s.challenge_id = c.id
+        ORDER BY s.submitted_at DESC
+    ''').fetchall()
+    conn.close()
+    
+    return jsonify([dict(sub) for sub in submissions])
+
+@app.route('/api/submissions/<int:submission_id>', methods=['PUT'])
+def update_submission(submission_id):
+    if session.get('role') != 'admin':
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 403
+    
+    data = request.json
+    status = data.get('status')
+    
+    conn = get_db_connection()
+    
+    # Get submission details
+    submission = conn.execute(
+        'SELECT * FROM submissions WHERE id = ?',
+        (submission_id,)
+    ).fetchone()
+    
+    if not submission:
+        conn.close()
+        return jsonify({'success': False, 'message': 'Submission not found'}), 404
+    
+    # Update submission status
+    conn.execute(
+        'UPDATE submissions SET status = ? WHERE id = ?',
+        (status, submission_id)
+    )
+    
+    # If accepting, update team score
+    if status == 'accepted' and submission['status'] != 'accepted':
+        challenge = conn.execute(
+            'SELECT points FROM challenges WHERE id = ?',
+            (submission['challenge_id'],)
+        ).fetchone()
+        
+        if challenge:
+            conn.execute(
+                'UPDATE teams SET score = score + ? WHERE id = ?',
+                (challenge['points'], submission['team_id'])
+            )
+    
+    conn.commit()
+    conn.close()
+    
+    return jsonify({'success': True})
+
+if __name__ == '__main__':
+    app.run(debug=True)
