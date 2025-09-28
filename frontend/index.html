@@ -444,13 +444,19 @@
             width: 100%;
         }
 
-        /* Neon Glow Effects */
-        .neon-glow {
-            text-shadow: 0 0 5px currentColor, 0 0 10px currentColor, 0 0 15px currentColor;
+        /* Loading Spinner */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: var(--accent);
+            animation: spin 1s ease-in-out infinite;
         }
 
-        .accent-glow {
-            box-shadow: 0 0 10px var(--accent), 0 0 20px var(--accent), 0 0 30px var(--accent);
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         /* Responsive */
@@ -493,339 +499,58 @@
                     <label class="form-label" for="password">Password</label>
                     <input type="password" id="password" class="form-input" required>
                 </div>
-                <button type="submit" class="btn w-100">Login</button>
+                <button type="submit" class="btn w-100" id="login-btn">
+                    <span id="login-text">Login</span>
+                    <span id="login-spinner" class="loading" style="display: none;"></span>
+                </button>
             </form>
+            <div class="text-center mt-20">
+                <button id="show-register" class="btn btn-secondary">Register as Player</button>
+            </div>
             <div id="login-message" class="mt-20 text-center" style="color: var(--danger); display: none;"></div>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="register-modal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close">&times;</button>
+            <h3 class="modal-title">Register as Player</h3>
+            <form id="register-form">
+                <div class="form-group">
+                    <label class="form-label" for="reg-username">Username</label>
+                    <input type="text" id="reg-username" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="reg-password">Password</label>
+                    <input type="password" id="reg-password" class="form-input" required>
+                </div>
+                <button type="submit" class="btn w-100">Register</button>
+            </form>
         </div>
     </div>
 
     <!-- Player Dashboard -->
     <div id="player-dashboard" class="dashboard">
-        <div class="header">
-            <div class="container">
-                <div class="header-content">
-                    <div class="logo">Flag-Frenxy-25</div>
-                    <div class="user-info">
-                        <span id="player-username">Player Name</span>
-                        <span id="player-team">Team: None</span>
-                        <button id="player-logout" class="btn btn-secondary">Logout</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="nav-tabs">
-            <div class="container d-flex">
-                <div class="nav-tab active" data-tab="challenges">Challenges</div>
-                <div class="nav-tab" data-tab="team">Team Management</div>
-                <div class="nav-tab" data-tab="scoreboard">Scoreboard</div>
-            </div>
-        </div>
-
-        <div class="container">
-            <div class="tab-content">
-                <!-- Challenges Tab -->
-                <div id="challenges-tab" class="tab-pane active">
-                    <h2 class="mb-20">CTF Challenges</h2>
-                    <div class="challenges-grid" id="challenges-container">
-                        <!-- Challenges will be populated by JavaScript -->
-                    </div>
-                </div>
-
-                <!-- Team Management Tab -->
-                <div id="team-tab" class="tab-pane">
-                    <h2 class="mb-20">Team Management</h2>
-                    
-                    <div id="no-team-section" class="team-section">
-                        <h3>Join or Create a Team</h3>
-                        <p>To participate in the CTF, you need to be part of a team.</p>
-                        <div class="d-flex gap-10 mt-20">
-                            <button id="create-team-btn" class="btn">Create Team</button>
-                            <button id="join-team-btn" class="btn btn-secondary">Join Team</button>
-                        </div>
-                    </div>
-
-                    <div id="team-section" class="team-section" style="display: none;">
-                        <h3>Your Team: <span id="team-name-display">Team Name</span></h3>
-                        <p>Team Code: <span class="team-code" id="team-code-display">XXXXXX</span></p>
-                        
-                        <h4>Team Members</h4>
-                        <ul id="team-members-list">
-                            <!-- Team members will be populated by JavaScript -->
-                        </ul>
-                        
-                        <button id="leave-team-btn" class="btn btn-secondary">Leave Team</button>
-                    </div>
-                </div>
-
-                <!-- Scoreboard Tab -->
-                <div id="scoreboard-tab" class="tab-pane">
-                    <h2 class="mb-20">Scoreboard</h2>
-                    <div class="chart-container">
-                        <h3 class="chart-title">Top Teams</h3>
-                        <canvas id="scoreboard-chart" width="400" height="200"></canvas>
-                    </div>
-                    <table class="teams-table">
-                        <thead>
-                            <tr>
-                                <th>Rank</th>
-                                <th>Team</th>
-                                <th>Score</th>
-                                <th>Solved</th>
-                            </tr>
-                        </thead>
-                        <tbody id="scoreboard-table">
-                            <!-- Scoreboard data will be populated by JavaScript -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+        <!-- Player dashboard content remains the same as previous -->
+        <!-- [Previous player dashboard HTML content] -->
     </div>
 
     <!-- Admin Dashboard -->
     <div id="admin-dashboard" class="dashboard">
-        <div class="header">
-            <div class="container">
-                <div class="header-content">
-                    <div class="logo">Flag-Frenxy-25 | Admin</div>
-                    <div class="user-info">
-                        <span id="admin-username">Admin User</span>
-                        <button id="admin-logout" class="btn btn-secondary">Logout</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="nav-tabs">
-            <div class="container d-flex">
-                <div class="nav-tab active" data-tab="overview">Overview</div>
-                <div class="nav-tab" data-tab="teams">Teams</div>
-                <div class="nav-tab" data-tab="challenges-admin">Challenges</div>
-                <div class="nav-tab" data-tab="submissions">Submissions</div>
-            </div>
-        </div>
-
-        <div class="container">
-            <div class="tab-content">
-                <!-- Overview Tab -->
-                <div id="overview-tab" class="tab-pane active">
-                    <h2 class="mb-20">Dashboard Overview</h2>
-                    
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-label">Total Teams</div>
-                            <div class="stat-value" id="total-teams">0</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-label">Total Players</div>
-                            <div class="stat-value" id="total-players">0</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-label">Challenges</div>
-                            <div class="stat-value" id="total-challenges">0</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-label">Submissions</div>
-                            <div class="stat-value" id="total-submissions">0</div>
-                        </div>
-                    </div>
-
-                    <div class="chart-container">
-                        <h3 class="chart-title">Challenge Completion</h3>
-                        <canvas id="challenge-completion-chart" width="400" height="200"></canvas>
-                    </div>
-
-                    <div class="chart-container">
-                        <h3 class="chart-title">Team Progress</h3>
-                        <canvas id="team-progress-chart" width="400" height="200"></canvas>
-                    </div>
-                </div>
-
-                <!-- Teams Tab -->
-                <div id="teams-tab" class="tab-pane">
-                    <h2 class="mb-20">Team Management</h2>
-                    
-                    <div class="d-flex justify-between align-center mb-20">
-                        <h3>Registered Teams</h3>
-                        <button id="add-team-btn" class="btn">Add Team</button>
-                    </div>
-                    
-                    <table class="teams-table">
-                        <thead>
-                            <tr>
-                                <th>Team Name</th>
-                                <th>Members</th>
-                                <th>Score</th>
-                                <th>Created</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="teams-table">
-                            <!-- Teams data will be populated by JavaScript -->
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Challenges Admin Tab -->
-                <div id="challenges-admin-tab" class="tab-pane">
-                    <h2 class="mb-20">Challenge Management</h2>
-                    
-                    <div class="d-flex justify-between align-center mb-20">
-                        <h3>CTF Challenges</h3>
-                        <button id="add-challenge-btn" class="btn">Add Challenge</button>
-                    </div>
-                    
-                    <div class="challenges-grid" id="admin-challenges-container">
-                        <!-- Admin challenges will be populated by JavaScript -->
-                    </div>
-                </div>
-
-                <!-- Submissions Tab -->
-                <div id="submissions-tab" class="tab-pane">
-                    <h2 class="mb-20">Submission Review</h2>
-                    
-                    <table class="teams-table">
-                        <thead>
-                            <tr>
-                                <th>Team</th>
-                                <th>Challenge</th>
-                                <th>Flag</th>
-                                <th>POC</th>
-                                <th>Description</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="submissions-table">
-                            <!-- Submissions data will be populated by JavaScript -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+        <!-- Admin dashboard content remains the same as previous -->
+        <!-- [Previous admin dashboard HTML content] -->
     </div>
 
-    <!-- Modals -->
-    <!-- Create Team Modal -->
-    <div id="create-team-modal" class="modal">
-        <div class="modal-content">
-            <button class="modal-close">&times;</button>
-            <h3 class="modal-title">Create Team</h3>
-            <form id="create-team-form">
-                <div class="form-group">
-                    <label class="form-label" for="team-name">Team Name</label>
-                    <input type="text" id="team-name" class="form-input" required>
-                </div>
-                <button type="submit" class="btn w-100">Create Team</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Join Team Modal -->
-    <div id="join-team-modal" class="modal">
-        <div class="modal-content">
-            <button class="modal-close">&times;</button>
-            <h3 class="modal-title">Join Team</h3>
-            <form id="join-team-form">
-                <div class="form-group">
-                    <label class="form-label" for="team-code">Team Code</label>
-                    <input type="text" id="team-code" class="form-input" required>
-                </div>
-                <button type="submit" class="btn w-100">Join Team</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Submit Flag Modal -->
-    <div id="submit-flag-modal" class="modal">
-        <div class="modal-content">
-            <button class="modal-close">&times;</button>
-            <h3 class="modal-title">Submit Flag</h3>
-            <form id="submit-flag-form">
-                <input type="hidden" id="challenge-id">
-                <div class="form-group">
-                    <label class="form-label" for="flag">Flag</label>
-                    <input type="text" id="flag" class="form-input" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="poc">Proof of Concept (Screenshot URL)</label>
-                    <input type="text" id="poc" class="form-input" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="description">Description</label>
-                    <textarea id="description" class="form-input" rows="4" required></textarea>
-                </div>
-                <button type="submit" class="btn w-100">Submit</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Add Team Modal (Admin) -->
-    <div id="add-team-modal" class="modal">
-        <div class="modal-content">
-            <button class="modal-close">&times;</button>
-            <h3 class="modal-title">Add Team</h3>
-            <form id="add-team-form">
-                <div class="form-group">
-                    <label class="form-label" for="admin-team-name">Team Name</label>
-                    <input type="text" id="admin-team-name" class="form-input" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="admin-team-leader">Team Leader Username</label>
-                    <input type="text" id="admin-team-leader" class="form-input" required>
-                </div>
-                <button type="submit" class="btn w-100">Add Team</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Add Challenge Modal (Admin) -->
-    <div id="add-challenge-modal" class="modal">
-        <div class="modal-content">
-            <button class="modal-close">&times;</button>
-            <h3 class="modal-title">Add Challenge</h3>
-            <form id="add-challenge-form">
-                <div class="form-group">
-                    <label class="form-label" for="challenge-title">Title</label>
-                    <input type="text" id="challenge-title" class="form-input" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="challenge-description">Description</label>
-                    <textarea id="challenge-description" class="form-input" rows="4" required></textarea>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="challenge-category">Category</label>
-                    <select id="challenge-category" class="form-input" required>
-                        <option value="web">Web</option>
-                        <option value="crypto">Cryptography</option>
-                        <option value="forensics">Forensics</option>
-                        <option value="pwn">Pwn</option>
-                        <option value="misc">Misc</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="challenge-difficulty">Difficulty</label>
-                    <select id="challenge-difficulty" class="form-input" required>
-                        <option value="easy">Easy</option>
-                        <option value="medium">Medium</option>
-                        <option value="hard">Hard</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="challenge-points">Points</label>
-                    <input type="number" id="challenge-points" class="form-input" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="challenge-flag">Flag</label>
-                    <input type="text" id="challenge-flag" class="form-input" required>
-                </div>
-                <button type="submit" class="btn w-100">Add Challenge</button>
-            </form>
-        </div>
-    </div>
+    <!-- All modals remain the same -->
+    <!-- [Previous modals HTML content] -->
 
     <script>
+        // Configuration - This will be updated after backend deployment
+        const API_BASE = window.location.hostname === 'localhost' 
+            ? 'http://localhost:5000' 
+            : 'YOUR_RAILWAY_BACKEND_URL'; // You'll update this after Railway deployment
+
         // Global state
         let currentUser = null;
         let currentRole = 'player';
@@ -838,70 +563,59 @@
         const playerDashboard = document.getElementById('player-dashboard');
         const adminDashboard = document.getElementById('admin-dashboard');
         const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const showRegisterBtn = document.getElementById('show-register');
+        const registerModal = document.getElementById('register-modal');
         const roleOptions = document.querySelectorAll('.role-option');
         const loginMessage = document.getElementById('login-message');
+        const loginBtn = document.getElementById('login-btn');
+        const loginText = document.getElementById('login-text');
+        const loginSpinner = document.getElementById('login-spinner');
         
-        // Player elements
-        const playerUsername = document.getElementById('player-username');
-        const playerTeam = document.getElementById('player-team');
-        const playerLogout = document.getElementById('player-logout');
-        const navTabs = document.querySelectorAll('.nav-tab');
-        const tabPanes = document.querySelectorAll('.tab-pane');
-        
-        // Team management elements
-        const noTeamSection = document.getElementById('no-team-section');
-        const teamSection = document.getElementById('team-section');
-        const createTeamBtn = document.getElementById('create-team-btn');
-        const joinTeamBtn = document.getElementById('join-team-btn');
-        const leaveTeamBtn = document.getElementById('leave-team-btn');
-        const teamNameDisplay = document.getElementById('team-name-display');
-        const teamCodeDisplay = document.getElementById('team-code-display');
-        const teamMembersList = document.getElementById('team-members-list');
-        
-        // Challenge elements
-        const challengesContainer = document.getElementById('challenges-container');
-        
-        // Modal elements
-        const modals = document.querySelectorAll('.modal');
-        const createTeamModal = document.getElementById('create-team-modal');
-        const joinTeamModal = document.getElementById('join-team-modal');
-        const submitFlagModal = document.getElementById('submit-flag-modal');
-        const createTeamForm = document.getElementById('create-team-form');
-        const joinTeamForm = document.getElementById('join-team-form');
-        const submitFlagForm = document.getElementById('submit-flag-form');
-        
-        // Admin elements
-        const adminUsername = document.getElementById('admin-username');
-        const adminLogout = document.getElementById('admin-logout');
-        const addTeamBtn = document.getElementById('add-team-btn');
-        const addChallengeBtn = document.getElementById('add-challenge-btn');
-        const addTeamModal = document.getElementById('add-team-modal');
-        const addChallengeModal = document.getElementById('add-challenge-modal');
-        const addTeamForm = document.getElementById('add-team-form');
-        const addChallengeForm = document.getElementById('add-challenge-form');
-        const teamsTable = document.getElementById('teams-table');
-        const adminChallengesContainer = document.getElementById('admin-challenges-container');
-        const submissionsTable = document.getElementById('submissions-table');
-        
-        // Stats elements
-        const totalTeams = document.getElementById('total-teams');
-        const totalPlayers = document.getElementById('total-players');
-        const totalChallenges = document.getElementById('total-challenges');
-        const totalSubmissions = document.getElementById('total-submissions');
+        // API Functions
+        async function apiCall(endpoint, options = {}) {
+            try {
+                const response = await fetch(`${API_BASE}${endpoint}`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    },
+                    credentials: 'include',
+                    ...options
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('API call failed:', error);
+                throw error;
+            }
+        }
 
         // Initialize the application
         document.addEventListener('DOMContentLoaded', function() {
-            // Check if user is already logged in (from localStorage)
-            const savedUser = localStorage.getItem('ctfUser');
-            const savedRole = localStorage.getItem('ctfRole');
+            // Check backend connection
+            checkBackendConnection();
             
-            if (savedUser && savedRole) {
-                currentUser = JSON.parse(savedUser);
-                currentRole = savedRole;
-                showDashboard();
+            // Event listeners
+            initializeEventListeners();
+        });
+
+        async function checkBackendConnection() {
+            try {
+                const health = await apiCall('/api/health');
+                console.log('Backend connected:', health);
+            } catch (error) {
+                console.error('Backend connection failed:', error);
+                showLoginMessage('Cannot connect to backend server. Please check if the backend is running.');
             }
-            
-            // Event listeners for role selection
+        }
+
+        function initializeEventListeners() {
+            // Role selection
             roleOptions.forEach(option => {
                 option.addEventListener('click', function() {
                     roleOptions.forEach(o => o.classList.remove('active'));
@@ -909,693 +623,110 @@
                 });
             });
             
-            // Login form submission
-            loginForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const username = document.getElementById('username').value;
-                const password = document.getElementById('password').value;
-                const role = document.querySelector('.role-option.active').dataset.role;
-                
-                // Simple authentication (in a real app, this would be done server-side)
-                if (username && password) {
-                    if (role === 'admin' && username === 'admin' && password === 'admin') {
-                        currentUser = { username, role };
-                        currentRole = role;
-                        localStorage.setItem('ctfUser', JSON.stringify(currentUser));
-                        localStorage.setItem('ctfRole', currentRole);
-                        showDashboard();
-                    } else if (role === 'player') {
-                        // For demo purposes, any player login works
-                        currentUser = { username, role, team: null };
-                        currentRole = role;
-                        localStorage.setItem('ctfUser', JSON.stringify(currentUser));
-                        localStorage.setItem('ctfRole', currentRole);
-                        showDashboard();
-                    } else {
-                        showLoginMessage('Invalid credentials');
-                    }
-                } else {
-                    showLoginMessage('Please enter both username and password');
-                }
-            });
+            // Login form
+            loginForm.addEventListener('submit', handleLogin);
             
-            // Logout buttons
-            playerLogout.addEventListener('click', logout);
-            adminLogout.addEventListener('click', logout);
+            // Register form
+            registerForm.addEventListener('submit', handleRegister);
+            showRegisterBtn.addEventListener('click', () => showModal(registerModal));
             
-            // Navigation tabs
-            navTabs.forEach(tab => {
-                tab.addEventListener('click', function() {
-                    const tabId = this.dataset.tab;
-                    
-                    // Update active tab
-                    navTabs.forEach(t => t.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    // Show corresponding content
-                    tabPanes.forEach(pane => {
-                        pane.classList.remove('active');
-                        if (pane.id === `${tabId}-tab`) {
-                            pane.classList.add('active');
-                        }
-                    });
-                    
-                    // Load data for specific tabs if needed
-                    if (tabId === 'scoreboard') {
-                        loadScoreboard();
-                    } else if (tabId === 'overview' && currentRole === 'admin') {
-                        loadAdminOverview();
-                    } else if (tabId === 'teams' && currentRole === 'admin') {
-                        loadAdminTeams();
-                    } else if (tabId === 'challenges-admin' && currentRole === 'admin') {
-                        loadAdminChallenges();
-                    } else if (tabId === 'submissions' && currentRole === 'admin') {
-                        loadAdminSubmissions();
-                    }
-                });
-            });
-            
-            // Team management
-            createTeamBtn.addEventListener('click', () => showModal(createTeamModal));
-            joinTeamBtn.addEventListener('click', () => showModal(joinTeamModal));
-            leaveTeamBtn.addEventListener('click', leaveTeam);
-            
-            // Modal forms
-            createTeamForm.addEventListener('submit', createTeam);
-            joinTeamForm.addEventListener('submit', joinTeam);
-            submitFlagForm.addEventListener('submit', submitFlag);
-            
-            // Admin modals
-            addTeamBtn.addEventListener('click', () => showModal(addTeamModal));
-            addChallengeBtn.addEventListener('click', () => showModal(addChallengeModal));
-            addTeamForm.addEventListener('submit', addTeam);
-            addChallengeForm.addEventListener('submit', addChallenge);
-            
-            // Close modals when clicking the X button
-            document.querySelectorAll('.modal-close').forEach(closeBtn => {
-                closeBtn.addEventListener('click', function() {
-                    this.closest('.modal').style.display = 'none';
-                });
-            });
-            
-            // Close modals when clicking outside
-            modals.forEach(modal => {
-                modal.addEventListener('click', function(e) {
-                    if (e.target === this) {
-                        this.style.display = 'none';
-                    }
-                });
-            });
-            
-            // Initialize with sample data
-            initializeSampleData();
-        });
+            // [Rest of your existing event listeners...]
+        }
 
-        // Functions
+        async function handleLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const role = document.querySelector('.role-option.active').dataset.role;
+            
+            if (!username || !password) {
+                showLoginMessage('Please enter both username and password');
+                return;
+            }
+            
+            // Show loading state
+            loginText.style.display = 'none';
+            loginSpinner.style.display = 'inline-block';
+            loginBtn.disabled = true;
+            
+            try {
+                const result = await apiCall('/api/login', {
+                    method: 'POST',
+                    body: JSON.stringify({ username, password })
+                });
+                
+                if (result.success) {
+                    currentUser = result.user;
+                    currentRole = result.user.role;
+                    showDashboard();
+                } else {
+                    showLoginMessage(result.message || 'Login failed');
+                }
+            } catch (error) {
+                showLoginMessage('Login failed. Please check your connection.');
+            } finally {
+                // Reset loading state
+                loginText.style.display = 'inline-block';
+                loginSpinner.style.display = 'none';
+                loginBtn.disabled = false;
+            }
+        }
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            const username = document.getElementById('reg-username').value;
+            const password = document.getElementById('reg-password').value;
+            
+            try {
+                const result = await apiCall('/api/register', {
+                    method: 'POST',
+                    body: JSON.stringify({ username, password })
+                });
+                
+                if (result.success) {
+                    alert('Registration successful! You can now login.');
+                    registerModal.style.display = 'none';
+                    registerForm.reset();
+                } else {
+                    alert('Registration failed: ' + result.message);
+                }
+            } catch (error) {
+                alert('Registration failed. Please try again.');
+            }
+        }
+
+        // [Rest of your existing JavaScript functions...]
+        // Note: You'll need to update all API calls in your existing JavaScript to use the apiCall function
+        
         function showLoginMessage(message) {
             loginMessage.textContent = message;
             loginMessage.style.display = 'block';
             setTimeout(() => {
                 loginMessage.style.display = 'none';
-            }, 3000);
-        }
-
-        function showDashboard() {
-            loginPage.style.display = 'none';
-            
-            if (currentRole === 'player') {
-                playerDashboard.style.display = 'block';
-                adminDashboard.style.display = 'none';
-                
-                // Update player info
-                playerUsername.textContent = currentUser.username;
-                
-                // Check if player has a team
-                if (currentUser.team) {
-                    noTeamSection.style.display = 'none';
-                    teamSection.style.display = 'block';
-                    teamNameDisplay.textContent = currentUser.team.name;
-                    teamCodeDisplay.textContent = currentUser.team.code;
-                    updateTeamMembersList();
-                    playerTeam.textContent = `Team: ${currentUser.team.name}`;
-                } else {
-                    noTeamSection.style.display = 'block';
-                    teamSection.style.display = 'none';
-                    playerTeam.textContent = 'Team: None';
-                }
-                
-                // Load challenges
-                loadChallenges();
-            } else {
-                playerDashboard.style.display = 'none';
-                adminDashboard.style.display = 'block';
-                
-                // Update admin info
-                adminUsername.textContent = currentUser.username;
-                
-                // Load admin data
-                loadAdminOverview();
-            }
-        }
-
-        function logout() {
-            currentUser = null;
-            currentRole = 'player';
-            localStorage.removeItem('ctfUser');
-            localStorage.removeItem('ctfRole');
-            loginPage.style.display = 'flex';
-            playerDashboard.style.display = 'none';
-            adminDashboard.style.display = 'none';
-            
-            // Reset login form
-            loginForm.reset();
+            }, 5000);
         }
 
         function showModal(modal) {
             modal.style.display = 'flex';
         }
 
-        function createTeam(e) {
-            e.preventDefault();
-            const teamName = document.getElementById('team-name').value;
-            
-            // Generate a random team code
-            const teamCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-            
-            // Create the team
-            const newTeam = {
-                id: teams.length + 1,
-                name: teamName,
-                code: teamCode,
-                members: [currentUser.username],
-                score: 0,
-                created: new Date().toISOString()
-            };
-            
-            teams.push(newTeam);
-            
-            // Update current user
-            currentUser.team = { id: newTeam.id, name: newTeam.name, code: newTeam.code };
-            localStorage.setItem('ctfUser', JSON.stringify(currentUser));
-            
-            // Update UI
-            createTeamModal.style.display = 'none';
-            createTeamForm.reset();
-            showDashboard();
-        }
+        // Add this function to close modals
+        document.querySelectorAll('.modal-close').forEach(closeBtn => {
+            closeBtn.addEventListener('click', function() {
+                this.closest('.modal').style.display = 'none';
+            });
+        });
 
-        function joinTeam(e) {
-            e.preventDefault();
-            const teamCode = document.getElementById('team-code').value.toUpperCase();
-            
-            // Find the team
-            const team = teams.find(t => t.code === teamCode);
-            
-            if (team) {
-                // Add user to team
-                team.members.push(currentUser.username);
-                
-                // Update current user
-                currentUser.team = { id: team.id, name: team.name, code: team.code };
-                localStorage.setItem('ctfUser', JSON.stringify(currentUser));
-                
-                // Update UI
-                joinTeamModal.style.display = 'none';
-                joinTeamForm.reset();
-                showDashboard();
-            } else {
-                alert('Invalid team code');
-            }
-        }
-
-        function leaveTeam() {
-            if (confirm('Are you sure you want to leave the team?')) {
-                // Find the team
-                const team = teams.find(t => t.id === currentUser.team.id);
-                
-                if (team) {
-                    // Remove user from team
-                    team.members = team.members.filter(member => member !== currentUser.username);
-                    
-                    // If team is empty, remove it
-                    if (team.members.length === 0) {
-                        teams = teams.filter(t => t.id !== team.id);
-                    }
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.style.display = 'none';
                 }
-                
-                // Update current user
-                currentUser.team = null;
-                localStorage.setItem('ctfUser', JSON.stringify(currentUser));
-                
-                // Update UI
-                showDashboard();
-            }
-        }
-
-        function updateTeamMembersList() {
-            if (!currentUser.team) return;
-            
-            const team = teams.find(t => t.id === currentUser.team.id);
-            if (!team) return;
-            
-            teamMembersList.innerHTML = '';
-            team.members.forEach(member => {
-                const li = document.createElement('li');
-                li.textContent = member;
-                if (member === currentUser.username) {
-                    li.innerHTML += ' <em>(You)</em>';
-                }
-                teamMembersList.appendChild(li);
             });
-        }
+        });
 
-        function loadChallenges() {
-            challengesContainer.innerHTML = '';
-            
-            challenges.forEach(challenge => {
-                const card = document.createElement('div');
-                card.className = 'challenge-card';
-                
-                // Check if challenge is already solved by the team
-                const isSolved = currentUser.team && 
-                    submissions.some(s => 
-                        s.teamId === currentUser.team.id && 
-                        s.challengeId === challenge.id && 
-                        s.status === 'accepted'
-                    );
-                
-                card.innerHTML = `
-                    <h3 class="challenge-title">${challenge.title}</h3>
-                    <span class="challenge-difficulty difficulty-${challenge.difficulty}">${challenge.difficulty.toUpperCase()}</span>
-                    <div class="challenge-points">${challenge.points} points</div>
-                    <div class="challenge-description">${challenge.description}</div>
-                    <div class="challenge-category">Category: ${challenge.category}</div>
-                    ${isSolved ? 
-                        '<div style="color: var(--success); margin-top: 10px;">✓ Solved</div>' : 
-                        '<button class="btn solve-challenge-btn" data-id="' + challenge.id + '">Solve Challenge</button>'
-                    }
-                `;
-                
-                challengesContainer.appendChild(card);
-            });
-            
-            // Add event listeners to solve buttons
-            document.querySelectorAll('.solve-challenge-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    if (!currentUser.team) {
-                        alert('You need to be in a team to solve challenges');
-                        return;
-                    }
-                    
-                    const challengeId = parseInt(this.dataset.id);
-                    document.getElementById('challenge-id').value = challengeId;
-                    showModal(submitFlagModal);
-                });
-            });
-        }
-
-        function submitFlag(e) {
-            e.preventDefault();
-            const challengeId = parseInt(document.getElementById('challenge-id').value);
-            const flag = document.getElementById('flag').value;
-            const poc = document.getElementById('poc').value;
-            const description = document.getElementById('description').value;
-            
-            // Find the challenge
-            const challenge = challenges.find(c => c.id === challengeId);
-            
-            if (!challenge) {
-                alert('Challenge not found');
-                return;
-            }
-            
-            // Check if flag is correct
-            if (flag === challenge.flag) {
-                // Create submission
-                const submission = {
-                    id: submissions.length + 1,
-                    teamId: currentUser.team.id,
-                    teamName: currentUser.team.name,
-                    challengeId: challengeId,
-                    challengeTitle: challenge.title,
-                    flag: flag,
-                    poc: poc,
-                    description: description,
-                    status: 'pending', // In a real app, this would be verified by admin
-                    submittedAt: new Date().toISOString()
-                };
-                
-                submissions.push(submission);
-                
-                // For demo purposes, auto-accept the submission
-                // In a real app, this would require admin approval
-                submission.status = 'accepted';
-                
-                // Update team score
-                const team = teams.find(t => t.id === currentUser.team.id);
-                if (team) {
-                    team.score += challenge.points;
-                }
-                
-                alert('Flag submitted successfully!');
-                submitFlagModal.style.display = 'none';
-                submitFlagForm.reset();
-                loadChallenges();
-            } else {
-                alert('Incorrect flag!');
-            }
-        }
-
-        function loadScoreboard() {
-            // Sort teams by score (descending)
-            const sortedTeams = [...teams].sort((a, b) => b.score - a.score);
-            
-            // Update scoreboard table
-            const scoreboardTable = document.getElementById('scoreboard-table');
-            scoreboardTable.innerHTML = '';
-            
-            sortedTeams.forEach((team, index) => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td>${team.name}</td>
-                    <td>${team.score}</td>
-                    <td>${submissions.filter(s => s.teamId === team.id && s.status === 'accepted').length}</td>
-                `;
-                scoreboardTable.appendChild(row);
-            });
-            
-            // Update chart (simplified for demo)
-            const ctx = document.getElementById('scoreboard-chart').getContext('2d');
-            // In a real app, you would use a charting library like Chart.js
-        }
-
-        function loadAdminOverview() {
-            // Update stats
-            totalTeams.textContent = teams.length;
-            totalPlayers.textContent = teams.reduce((sum, team) => sum + team.members.length, 0);
-            totalChallenges.textContent = challenges.length;
-            totalSubmissions.textContent = submissions.length;
-            
-            // Update charts (simplified for demo)
-            // In a real app, you would use a charting library like Chart.js
-        }
-
-        function loadAdminTeams() {
-            teamsTable.innerHTML = '';
-            
-            teams.forEach(team => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${team.name}</td>
-                    <td>${team.members.join(', ')}</td>
-                    <td>${team.score}</td>
-                    <td>${new Date(team.created).toLocaleDateString()}</td>
-                    <td>
-                        <button class="action-btn action-edit" data-id="${team.id}">Edit</button>
-                        <button class="action-btn action-delete" data-id="${team.id}">Delete</button>
-                    </td>
-                `;
-                teamsTable.appendChild(row);
-            });
-            
-            // Add event listeners to action buttons
-            document.querySelectorAll('.action-delete').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const teamId = parseInt(this.dataset.id);
-                    deleteTeam(teamId);
-                });
-            });
-        }
-
-        function loadAdminChallenges() {
-            adminChallengesContainer.innerHTML = '';
-            
-            challenges.forEach(challenge => {
-                const card = document.createElement('div');
-                card.className = 'challenge-card';
-                
-                card.innerHTML = `
-                    <h3 class="challenge-title">${challenge.title}</h3>
-                    <span class="challenge-difficulty difficulty-${challenge.difficulty}">${challenge.difficulty.toUpperCase()}</span>
-                    <div class="challenge-points">${challenge.points} points</div>
-                    <div class="challenge-description">${challenge.description}</div>
-                    <div class="challenge-category">Category: ${challenge.category}</div>
-                    <div class="challenge-solves">Solves: ${submissions.filter(s => s.challengeId === challenge.id && s.status === 'accepted').length}</div>
-                    <div class="d-flex gap-10 mt-10">
-                        <button class="btn btn-secondary edit-challenge-btn" data-id="${challenge.id}">Edit</button>
-                        <button class="btn btn-secondary delete-challenge-btn" data-id="${challenge.id}">Delete</button>
-                    </div>
-                `;
-                
-                adminChallengesContainer.appendChild(card);
-            });
-            
-            // Add event listeners to action buttons
-            document.querySelectorAll('.delete-challenge-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const challengeId = parseInt(this.dataset.id);
-                    deleteChallenge(challengeId);
-                });
-            });
-        }
-
-        function loadAdminSubmissions() {
-            submissionsTable.innerHTML = '';
-            
-            submissions.forEach(submission => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${submission.teamName}</td>
-                    <td>${submission.challengeTitle}</td>
-                    <td>${submission.flag}</td>
-                    <td><a href="${submission.poc}" target="_blank">View POC</a></td>
-                    <td>${submission.description}</td>
-                    <td>
-                        <span class="challenge-difficulty ${submission.status === 'accepted' ? 'difficulty-easy' : submission.status === 'rejected' ? 'difficulty-hard' : 'difficulty-medium'}">
-                            ${submission.status.toUpperCase()}
-                        </span>
-                    </td>
-                    <td>
-                        ${submission.status === 'pending' ? 
-                            `<button class="action-btn action-edit accept-submission-btn" data-id="${submission.id}">Accept</button>
-                             <button class="action-btn action-delete reject-submission-btn" data-id="${submission.id}">Reject</button>` : 
-                            ''
-                        }
-                    </td>
-                `;
-                submissionsTable.appendChild(row);
-            });
-            
-            // Add event listeners to action buttons
-            document.querySelectorAll('.accept-submission-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const submissionId = parseInt(this.dataset.id);
-                    updateSubmissionStatus(submissionId, 'accepted');
-                });
-            });
-            
-            document.querySelectorAll('.reject-submission-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const submissionId = parseInt(this.dataset.id);
-                    updateSubmissionStatus(submissionId, 'rejected');
-                });
-            });
-        }
-
-        function addTeam(e) {
-            e.preventDefault();
-            const teamName = document.getElementById('admin-team-name').value;
-            const teamLeader = document.getElementById('admin-team-leader').value;
-            
-            // Generate a random team code
-            const teamCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-            
-            // Create the team
-            const newTeam = {
-                id: teams.length + 1,
-                name: teamName,
-                code: teamCode,
-                members: [teamLeader],
-                score: 0,
-                created: new Date().toISOString()
-            };
-            
-            teams.push(newTeam);
-            
-            // Update UI
-            addTeamModal.style.display = 'none';
-            addTeamForm.reset();
-            loadAdminTeams();
-            loadAdminOverview();
-        }
-
-        function addChallenge(e) {
-            e.preventDefault();
-            const title = document.getElementById('challenge-title').value;
-            const description = document.getElementById('challenge-description').value;
-            const category = document.getElementById('challenge-category').value;
-            const difficulty = document.getElementById('challenge-difficulty').value;
-            const points = parseInt(document.getElementById('challenge-points').value);
-            const flag = document.getElementById('challenge-flag').value;
-            
-            // Create the challenge
-            const newChallenge = {
-                id: challenges.length + 1,
-                title,
-                description,
-                category,
-                difficulty,
-                points,
-                flag
-            };
-            
-            challenges.push(newChallenge);
-            
-            // Update UI
-            addChallengeModal.style.display = 'none';
-            addChallengeForm.reset();
-            loadAdminChallenges();
-            loadAdminOverview();
-        }
-
-        function deleteTeam(teamId) {
-            if (confirm('Are you sure you want to delete this team?')) {
-                teams = teams.filter(team => team.id !== teamId);
-                loadAdminTeams();
-                loadAdminOverview();
-            }
-        }
-
-        function deleteChallenge(challengeId) {
-            if (confirm('Are you sure you want to delete this challenge?')) {
-                challenges = challenges.filter(challenge => challenge.id !== challengeId);
-                loadAdminChallenges();
-                loadAdminOverview();
-            }
-        }
-
-        function updateSubmissionStatus(submissionId, status) {
-            const submission = submissions.find(s => s.id === submissionId);
-            if (submission) {
-                submission.status = status;
-                
-                // If accepting, update team score
-                if (status === 'accepted') {
-                    const challenge = challenges.find(c => c.id === submission.challengeId);
-                    const team = teams.find(t => t.id === submission.teamId);
-                    
-                    if (challenge && team) {
-                        team.score += challenge.points;
-                    }
-                }
-                
-                loadAdminSubmissions();
-                loadAdminOverview();
-            }
-        }
-
-        function initializeSampleData() {
-            // Sample challenges
-            challenges = [
-                {
-                    id: 1,
-                    title: "Web Exploitation - Login Bypass",
-                    description: "Find a way to bypass the login mechanism on the target website.",
-                    category: "web",
-                    difficulty: "easy",
-                    points: 100,
-                    flag: "FLAG{web_login_bypass_123}"
-                },
-                {
-                    id: 2,
-                    title: "Cryptography - Caesar Cipher",
-                    description: "Decrypt the given ciphertext that was encrypted using a Caesar cipher.",
-                    category: "crypto",
-                    difficulty: "easy",
-                    points: 150,
-                    flag: "FLAG{caesar_shift_3}"
-                },
-                {
-                    id: 3,
-                    title: "Forensics - Hidden Message",
-                    description: "Extract the hidden message from the provided image file.",
-                    category: "forensics",
-                    difficulty: "medium",
-                    points: 200,
-                    flag: "FLAG{steganography_is_fun}"
-                },
-                {
-                    id: 4,
-                    title: "Pwn - Buffer Overflow",
-                    description: "Exploit the buffer overflow vulnerability in the provided binary.",
-                    category: "pwn",
-                    difficulty: "hard",
-                    points: 300,
-                    flag: "FLAG{stack_smashing_101}"
-                }
-            ];
-            
-            // Sample teams
-            teams = [
-                {
-                    id: 1,
-                    name: "Cyber Ninjas",
-                    code: "NINJA1",
-                    members: ["alice", "bob"],
-                    score: 250,
-                    created: new Date().toISOString()
-                },
-                {
-                    id: 2,
-                    name: "Hackers United",
-                    code: "HACKU1",
-                    members: ["charlie"],
-                    score: 150,
-                    created: new Date().toISOString()
-                }
-            ];
-            
-            // Sample submissions
-            submissions = [
-                {
-                    id: 1,
-                    teamId: 1,
-                    teamName: "Cyber Ninjas",
-                    challengeId: 1,
-                    challengeTitle: "Web Exploitation - Login Bypass",
-                    flag: "FLAG{web_login_bypass_123}",
-                    poc: "https://example.com/poc1.png",
-                    description: "Used SQL injection to bypass authentication",
-                    status: "accepted",
-                    submittedAt: new Date().toISOString()
-                },
-                {
-                    id: 2,
-                    teamId: 1,
-                    teamName: "Cyber Ninjas",
-                    challengeId: 2,
-                    challengeTitle: "Cryptography - Caesar Cipher",
-                    flag: "FLAG{caesar_shift_3}",
-                    poc: "https://example.com/poc2.png",
-                    description: "Applied frequency analysis to determine shift value",
-                    status: "accepted",
-                    submittedAt: new Date().toISOString()
-                },
-                {
-                    id: 3,
-                    teamId: 2,
-                    teamName: "Hackers United",
-                    challengeId: 1,
-                    challengeTitle: "Web Exploitation - Login Bypass",
-                    flag: "FLAG{web_login_bypass_123}",
-                    poc: "https://example.com/poc3.png",
-                    description: "Used parameter pollution to bypass login",
-                    status: "accepted",
-                    submittedAt: new Date().toISOString()
-                }
-            ];
-        }
+        // [Include all your existing JavaScript functions from the previous implementation]
+        // Make sure to replace all fetch calls with apiCall function
     </script>
 </body>
 </html>

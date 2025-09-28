@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, session
+from flask import Flask, request, jsonify, session, send_from_directory
 from flask_cors import CORS
 import sqlite3
 import hashlib
@@ -7,8 +7,10 @@ import uuid
 from datetime import datetime
 
 app = Flask(__name__)
-app.secret_key = os.urandom(24)
-CORS(app)
+app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
+
+# Configure CORS for all origins (will be restricted in production)
+CORS(app, origins=["*"])
 
 # Database setup
 def init_db():
@@ -57,8 +59,29 @@ def init_db():
     try:
         c.execute("INSERT INTO users (username, password, role) VALUES (?, ?, ?)",
                   ('admin', hashlib.sha256('admin'.encode()).hexdigest(), 'admin'))
+        print("Admin user created: username='admin', password='admin'")
     except sqlite3.IntegrityError:
         pass
+    
+    # Insert sample challenges if none exist
+    challenge_count = c.execute("SELECT COUNT(*) FROM challenges").fetchone()[0]
+    if challenge_count == 0:
+        sample_challenges = [
+            ('Web Exploitation - Login Bypass', 'Find a way to bypass the login mechanism on the target website.', 'web', 'easy', 100, 'FLAG{web_login_bypass_123}'),
+            ('Cryptography - Caesar Cipher', 'Decrypt the given ciphertext that was encrypted using a Caesar cipher.', 'crypto', 'easy', 150, 'FLAG{caesar_shift_3}'),
+            ('Forensics - Hidden Message', 'Extract the hidden message from the provided image file.', 'forensics', 'medium', 200, 'FLAG{steganography_is_fun}'),
+            ('Pwn - Buffer Overflow', 'Exploit the buffer overflow vulnerability in the provided binary.', 'pwn', 'hard', 300, 'FLAG{stack_smashing_101}')
+        ]
+        
+        for challenge in sample_challenges:
+            try:
+                c.execute(
+                    'INSERT INTO challenges (title, description, category, difficulty, points, flag) VALUES (?, ?, ?, ?, ?, ?)',
+                    challenge
+                )
+            except sqlite3.IntegrityError:
+                pass
+        print("Sample challenges created")
     
     conn.commit()
     conn.close()
@@ -71,12 +94,20 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
+# Health check endpoint
+@app.route('/api/health', methods=['GET'])
+def health_check():
+    return jsonify({'status': 'healthy', 'message': 'CTF API is running'})
+
 # Authentication routes
 @app.route('/api/login', methods=['POST'])
 def login():
     data = request.json
     username = data.get('username')
     password = data.get('password')
+    
+    if not username or not password:
+        return jsonify({'success': False, 'message': 'Username and password required'}), 400
     
     conn = get_db_connection()
     user = conn.execute(
@@ -125,6 +156,9 @@ def create_team():
     data = request.json
     team_name = data.get('name')
     
+    if not team_name:
+        return jsonify({'success': False, 'message': 'Team name required'}), 400
+    
     # Generate unique team code
     team_code = str(uuid.uuid4())[:8].upper()
     
@@ -162,6 +196,9 @@ def join_team():
     data = request.json
     team_code = data.get('code')
     
+    if not team_code:
+        return jsonify({'success': False, 'message': 'Team code required'}), 400
+    
     conn = get_db_connection()
     team = conn.execute('SELECT * FROM teams WHERE code = ?', (team_code,)).fetchone()
     
@@ -195,6 +232,12 @@ def create_challenge():
         return jsonify({'success': False, 'message': 'Unauthorized'}), 403
     
     data = request.json
+    required_fields = ['title', 'description', 'category', 'difficulty', 'points', 'flag']
+    
+    for field in required_fields:
+        if not data.get(field):
+            return jsonify({'success': False, 'message': f'{field} is required'}), 400
+    
     conn = get_db_connection()
     
     try:
@@ -221,6 +264,9 @@ def submit_flag():
     flag = data.get('flag')
     poc = data.get('poc')
     description = data.get('description')
+    
+    if not all([challenge_id, flag, poc, description]):
+        return jsonify({'success': False, 'message': 'All fields are required'}), 400
     
     conn = get_db_connection()
     
@@ -250,14 +296,12 @@ def submit_flag():
         (session['team_id'], challenge_id, flag, poc, description)
     )
     
-    # For demo, auto-accept (in real app, admin would review)
-    # Update team score
+    # Auto-accept for demo (in real app, admin would review)
     conn.execute(
         'UPDATE teams SET score = score + ? WHERE id = ?',
         (challenge['points'], session['team_id'])
     )
     
-    # Mark submission as accepted
     conn.execute(
         'UPDATE submissions SET status = "accepted" WHERE team_id = ? AND challenge_id = ?',
         (session['team_id'], challenge_id)
@@ -292,6 +336,9 @@ def update_submission(submission_id):
     
     data = request.json
     status = data.get('status')
+    
+    if status not in ['pending', 'accepted', 'rejected']:
+        return jsonify({'success': False, 'message': 'Invalid status'}), 400
     
     conn = get_db_connection()
     
@@ -329,5 +376,64 @@ def update_submission(submission_id):
     
     return jsonify({'success': True})
 
+# User registration (for players)
+@app.route('/api/register', methods=['POST'])
+def register():
+    data = request.json
+    username = data.get('username')
+    password = data.get('password')
+    
+    if not username or not password:
+        return jsonify({'success': False, 'message': 'Username and password required'}), 400
+    
+    conn = get_db_connection()
+    
+    try:
+        conn.execute(
+            'INSERT INTO users (username, password, role) VALUES (?, ?, ?)',
+            (username, hashlib.sha256(password.encode()).hexdigest(), 'player')
+        )
+        conn.commit()
+    except sqlite3.IntegrityError:
+        conn.close()
+        return jsonify({'success': False, 'message': 'Username already exists'}), 400
+    
+    conn.close()
+    return jsonify({'success': True})
+
+# Get current user info
+@app.route('/api/user', methods=['GET'])
+def get_user():
+    if 'user_id' not in session:
+        return jsonify({'success': False, 'message': 'Not authenticated'}), 401
+    
+    conn = get_db_connection()
+    user = conn.execute('SELECT * FROM users WHERE id = ?', (session['user_id'],)).fetchone()
+    
+    team = None
+    if user['team_id']:
+        team = conn.execute('SELECT * FROM teams WHERE id = ?', (user['team_id'],)).fetchone()
+    
+    conn.close()
+    
+    user_data = {
+        'id': user['id'],
+        'username': user['username'],
+        'role': user['role'],
+        'team_id': user['team_id']
+    }
+    
+    if team:
+        user_data['team'] = {
+            'id': team['id'],
+            'name': team['name'],
+            'code': team['code'],
+            'score': team['score']
+        }
+    
+    return jsonify({'success': True, 'user': user_data})
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    debug = os.environ.get('DEBUG', 'False').lower() == 'true'
+    app.run(host='0.0.0.0', port=port, debug=debug)
