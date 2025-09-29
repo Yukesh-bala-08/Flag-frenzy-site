@@ -1,6 +1,6 @@
 const API_BASE = window.location.hostname === 'localhost' 
     ? 'http://localhost:10000' 
-    : 'https://your-backend-url.onrender.com';
+    : 'https://flag-frenzy-25.onrender.com';
 
 let currentUser = null;
 
