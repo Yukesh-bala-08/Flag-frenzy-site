@@ -1,7 +1,11 @@
 {
-  "name": "frontend",
+  "name": "reg-proxy-frontend",
   "version": "1.0.0",
+  "description": "Frontend for Reg-Proxy-25",
   "scripts": {
-    "build": "echo 'No build process needed'"
-  }
+    "build": "echo 'No build process needed for static files'",
+    "dev": "python -m http.server 3000"
+  },
+  "dependencies": {},
+  "devDependencies": {}
 }
